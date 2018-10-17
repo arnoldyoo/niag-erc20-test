@@ -4,12 +4,15 @@ import 'zeppelin-solidity/contracts/token/ERC20/CappedToken.sol';
 import 'zeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
 import './NIAGTimelock.sol';
 
-contract NIAG is CappedToken(800000000), BurnableToken {
-	uint public constant INITIAL_SUPPLY = 320000000;
-  string public name = 'NIAGToken';
-  string public symbol = 'NIAG';
-  uint8 public decimals = 8;
+contract NIAGInfo {
+	uint internal constant INITIAL_SUPPLY = 320000000;
+  string internal name = 'NIAGToken';
+  string internal symbol = 'NIAG';
+  uint8 internal decimals = 8;
   address internal owner;
+}
+
+contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
   mapping (address => NIAGTimelock[]) timelockList;
 	mapping (address => bool) public frozenAccount;
 
@@ -42,7 +45,7 @@ contract NIAG is CappedToken(800000000), BurnableToken {
   }
 
 	// release lockup account multi
-	function releaseMulti(address[] addresses) {
+	function releaseMulti(address[] memory addresses) {
   	for(uint i = 0; i < addresses.length; i++) {
     	NIAGTimelock[] memory locks = timelockList[addresses[i]];
 
@@ -91,11 +94,11 @@ contract NIAG is CappedToken(800000000), BurnableToken {
   }
 
   // transfer multi
-  function transferMulti(address[] memory addresses, mapping(address => uint256) memory values) public isNotFrozen returns (bool) {
-    require (addressess.length == value.length);
+  function transferMulti(address[] memory addresses, uint256[] memory values) public isNotFrozen returns (bool) {
+    require (addresses.length == values.length);
     for (uint256 i = 0; i < addresses.length; i++) {
-      require(values[addresses[i]] > 0);
-      super.transfer(addresses[i], values[addresses[i]]);
+      require(values[i] > 0);
+      super.transfer(addresses[i], values[i]);
   	}
     return true;
   }
