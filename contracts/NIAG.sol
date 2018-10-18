@@ -17,6 +17,7 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 	mapping (address => bool) public frozenAccount;
 
 	event FrozenFunds(address target, bool frozen);
+	event lockUp(address who, uint256 when, uint256 amount);
 
   constructor() {
   	totalSupply_ = INITIAL_SUPPLY * 10 ** uint(decimals);
@@ -40,15 +41,16 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 	}
 
 	// add lockup
-  function lockUp(address _address, uint256 when, uint256 amount) public isOwner {
+  function lockUp(address _address, uint256 when, uint256 amount) public isOwner returns (bool) {
   	timelockList[_address].push(new NIAGTimelock(this, _address, when, amount));
+		emit lockUp(_address, when, amount);
+		return true
   }
 
 	// release lockup account multi
 	function releaseMulti(address[] memory addresses) {
   	for(uint i = 0; i < addresses.length; i++) {
     	NIAGTimelock[] memory locks = timelockList[addresses[i]];
-
       for(uint j = 0; j < locks.length; j++) {
       	if(locks[j].releaseTime() >= block.timestamp) {
         	locks[j].release();
@@ -74,7 +76,10 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
     }
   }
 
-	// @TODO: make single mint function
+	// single mint
+	function mintSingle(address memory _address, uint256 amount) public biggerThenZero(amount) {
+  	super.mint(_address, amount);
+  }
 
 	// burn totalSupply
   function burn(uint256 _value) isOwner {
@@ -83,9 +88,18 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
   }
 
 	// @TODO: freeze source
-	function freezeAccount(address _address, bool _isFreeze) isOwner {
-			frozenAccount[_address] = _isFreeze;
-			emit FrozenFunds(_address, _isFreeze);
+	function freezeAccount(address memory _address) isOwner {
+			require(frozenAccount[_address] == false);
+			frozenAccount[_address] = true;
+			emit FrozenFunds(_address, true);
+	}
+
+	// unfrozen
+	function unFreezeAccount(address memory _address) isOwner {
+		require(frozenAccount[_address] == true);
+		frozenAccount[_address] = false;
+
+		emit FrozenFunds(_address, false);
 	}
 
 	// transfer single
@@ -97,7 +111,6 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
   function transferMulti(address[] memory addresses, uint256[] memory values) public isNotFrozen returns (bool) {
     require (addresses.length == values.length);
     for (uint256 i = 0; i < addresses.length; i++) {
-      require(values[i] > 0);
       super.transfer(addresses[i], values[i]);
   	}
     return true;
