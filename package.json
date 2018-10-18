@@ -7,13 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "node ./client/niag-token.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "truffle-hdwallet-provider": "0.0.6",
+    "web3": "^1.0.0-beta.36",
     "zeppelin-solidity": "1.12.0"
   }
 }
