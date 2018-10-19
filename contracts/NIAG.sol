@@ -2,9 +2,11 @@ pragma solidity ^0.4.24;
 
 import 'zeppelin-solidity/contracts/token/ERC20/CappedToken.sol';
 import 'zeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
-import './NIAGTimelock.sol';
+import "zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract NIAGInfo {
+	using SafeERC20 for ERC20Basic;
+
 	uint internal constant INITIAL_SUPPLY = 320000000;
   string public name = 'NIAGToken';
   string public symbol = 'NIAG';
@@ -13,14 +15,18 @@ contract NIAGInfo {
 }
 
 contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
-  mapping (address => NIAGTimelock[]) timelockList;
+	struct LockInfo {
+		address _beneficiary;
+    uint256 _releaseTime;
+    uint256 _amount;
+	}
+
+  mapping (address => LockInfo[]) timelockList;
 	mapping (address => bool) public frozenAccount;
 
+	event LogString(string str);
 	event FrozenFunds(address target, bool frozen);
 	event LockUp(address who, uint256 when, uint256 amount);
-
-	event Lock(NIAGTimelock[] lock);
-	event LogString(string str);
 
   constructor() public {
   	totalSupply_ = INITIAL_SUPPLY * 10 ** uint(decimals);
@@ -45,35 +51,44 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 
 	// add lockup
   function lockUp(address _address, uint256 when, uint256 amount) public isOwner returns (bool) {
-  	timelockList[_address].push(new NIAGTimelock(this, _address, when, amount));
+
+		LockInfo memory lock;
+		lock._amount = amount;
+		lock._releaseTime = when;
+		lock._beneficiary = _address;
+		timelockList[_address].push(lock);
 		emit LockUp(_address, when, amount);
+
 		return true;
+  }
+
+	function _release(LockInfo lock) private {
+    // require(now >= lock._releaseTime);
+    require(lock._amount > 0);
+    require(super.transfer(lock._beneficiary, lock._amount));
   }
 
 
 	// release lockup account single
-  function release(address _address) public {
-  	NIAGTimelock[] memory locks = timelockList[_address];
-		emit Lock(locks);
+  function release(address _address) public isOwner returns (bool) {
+  	LockInfo[] memory locks = timelockList[_address];
     for(uint j = 0; j < locks.length; j++) {
-			emit LogString("releaseSingle for inner");
-      if(locks[j].releaseTime() >= block.timestamp) {
-				emit LogString("super.release() before");
-      	locks[j].release();
-				emit LogString("super.release() after");
+      if(locks[j]._releaseTime >= block.timestamp) {
+      	_release(locks[j]);
       }
     }
+		return true;
   }
 
 	// mintable multi (need diferrent amount)
-  function mintMulti(address[] memory addresses, uint256 amount) public biggerThenZero(amount) {
+  function mintMulti(address[] memory addresses, uint256 amount) public isOwner biggerThenZero(amount) {
   	for(uint256 i = 0; i < addresses.length; i++) {
     	super.mint(addresses[i], amount);
     }
   }
 
 	// single mint
-	function mintSingle(address _address, uint256 amount) public biggerThenZero(amount) {
+	function mintSingle(address _address, uint256 amount) public isOwner biggerThenZero(amount) {
   	super.mint(_address, amount);
   }
 

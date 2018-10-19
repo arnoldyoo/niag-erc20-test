@@ -10,7 +10,6 @@ import "zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
  */
 contract NIAGTimelock {
   using SafeERC20 for ERC20Basic;
-
   // ERC20 basic token contract being held
   ERC20Basic public token;
 
@@ -44,10 +43,8 @@ contract NIAGTimelock {
    */
   function release() public {
     // solium-disable-next-line security/no-block-members
-    require(block.timestamp >= releaseTime);
-
+    require(now >= releaseTime);
     require(amount > 0);
-
     token.safeTransfer(beneficiary, amount);
   }
 }
