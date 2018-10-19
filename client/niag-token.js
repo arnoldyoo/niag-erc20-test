@@ -16,9 +16,9 @@ async function log() {
   const contract = new web3.eth.Contract(abiArray, contractAddress);
 
   await contract.events.allEvents({ fromBlock: 'latest' }, function(error, result) {
-    console.log('==============================')
+    console.log('========================================================================================================================')
     console.log(result)
-    console.log('==============================')
+    console.log('========================================================================================================================')
   });
 }
 

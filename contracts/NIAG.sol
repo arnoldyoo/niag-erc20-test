@@ -63,7 +63,7 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
   }
 
 	function _release(LockInfo lock) private {
-    // require(now >= lock._releaseTime);
+    require(block.timestamp >= lock._releaseTime);
     require(lock._amount > 0);
     require(super.transfer(lock._beneficiary, lock._amount));
   }
