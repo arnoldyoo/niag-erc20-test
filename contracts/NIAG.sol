@@ -6,15 +6,15 @@ import "zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract NIAGInfo {
 	using SafeERC20 for ERC20Basic;
-
 	uint internal constant INITIAL_SUPPLY = 320000000;
   string public name = 'NIAGToken';
   string public symbol = 'NIAG';
   uint8 public decimals = 8;
   address internal owner;
+	uint public CAP_SUPPLY = 800000000 * 10 ** uint(decimals);
 }
 
-contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
+contract NIAG is CappedToken(NIAGInfo.CAP_SUPPLY), BurnableToken, NIAGInfo {
 	struct LockInfo {
 		address _beneficiary;
     uint256 _releaseTime;
@@ -51,14 +51,12 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 
 	// add lockup
   function lockUp(address _address, uint256 when, uint256 amount) public isOwner returns (bool) {
-
 		LockInfo memory lock;
 		lock._amount = amount;
 		lock._releaseTime = when;
 		lock._beneficiary = _address;
 		timelockList[_address].push(lock);
 		emit LockUp(_address, when, amount);
-
 		return true;
   }
 
@@ -83,13 +81,13 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 	// mintable multi (need diferrent amount)
   function mintMulti(address[] memory addresses, uint256 amount) public isOwner biggerThenZero(amount) {
   	for(uint256 i = 0; i < addresses.length; i++) {
-    	super.mint(addresses[i], amount);
+    	super.mint(addresses[i], amount * 10 ** uint(decimals));
     }
   }
 
 	// single mint
 	function mintSingle(address _address, uint256 amount) public isOwner biggerThenZero(amount) {
-  	super.mint(_address, amount);
+  	super.mint(_address, amount * 10 ** uint(decimals));
   }
 
 	// burn totalSupply

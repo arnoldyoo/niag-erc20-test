@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const EthereumTx = require('ethereumjs-tx')
 
-const contractAddress = '0x346E87bd11c40393012E488AF296BE47A7a89FBe'
+const contractAddress = '0xB10846b31C979c6800644Fb57e6eD39129D9C033'
 const abiArray = JSON.parse(fs.readFileSync(path.resolve(__dirname, `./../build/contracts/NIAG.json`), 'utf-8')).abi
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'))
 const contract = new web3.eth.Contract(abiArray, contractAddress);
@@ -24,9 +24,9 @@ async function log() {
 
 const getBalanceTest = async () => {
   // owner
-  const balance = await contract.methods.balanceOf(publicKey).call()
+  // const balance = await contract.methods.balanceOf(publicKey).call()
   // account 1
-  // const balance = await contract.methods.balanceOf(toAddress).call()
+  const balance = await contract.methods.balanceOf(toAddress).call()
 
   console.log('balance : ', balance)
 }
@@ -169,7 +169,7 @@ const mintTest = async () => {
       "gasLimit": web3.utils.toHex(gasLimit),
       "to": contractAddress,
       "value": "0x0",
-      "data": contract.methods.mintSingle(toAddress, 2000).encodeABI(),
+      "data": contract.methods.mintSingle(toAddress, 70000000).encodeABI(),
       "chainId": chainId
   };
   const tx = new EthereumTx(rawTransaction);
@@ -182,7 +182,7 @@ const mintTest = async () => {
 
 
 async function main() {
-  getBalanceTest()
+  // await getBalanceTest()
 
   // sendTest()
   //
@@ -191,6 +191,8 @@ async function main() {
   // releaseTest()
   //
   // freezeTest()
+
+  await mintTest()
 }
 
 log()
