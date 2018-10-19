@@ -13,18 +13,25 @@
  */
 
 const HDWalletProvider = require("truffle-hdwallet-provider");
-const myTestMnemonic = "treat position fury letter ...";
-const infra = 'https://ropsten.infura.io/v3/'
+const myTestMnemonic = "detect black art fiscal panther faculty usage axis frame interest engine spare";
+const infra = 'http://localhost:7545'
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
+  // networks: {
+  //   ropsten: {
+  //     provider: function() {
+  //       return new HDWalletProvider(myTestMnemonic, infra)
+  //     },
+  //     network_id: 3
+  //   }
+  // }
   networks: {
-    ropsten: {
-      provider: function() {
-        return new HDWalletProvider(myTestMnemonic, infra)
-      },
-      network_id: 3
+      development: {
+      host: "127.0.0.1",
+      port: 7545,
+      network_id: "*"
     }
   }
 };

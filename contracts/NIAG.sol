@@ -19,6 +19,9 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 	event FrozenFunds(address target, bool frozen);
 	event LockUp(address who, uint256 when, uint256 amount);
 
+	event Lock(NIAGTimelock[] lock);
+	event LogString(string str);
+
   constructor() public {
   	totalSupply_ = INITIAL_SUPPLY * 10 ** uint(decimals);
     balances[msg.sender] = INITIAL_SUPPLY;
@@ -47,24 +50,17 @@ contract NIAG is CappedToken(800000000), BurnableToken, NIAGInfo {
 		return true;
   }
 
-	// release lockup account multi
-	function releaseMulti(address[] memory addresses) public {
-  	for(uint i = 0; i < addresses.length; i++) {
-    	NIAGTimelock[] memory locks = timelockList[addresses[i]];
-      for(uint j = 0; j < locks.length; j++) {
-      	if(locks[j].releaseTime() >= block.timestamp) {
-        	locks[j].release();
-        }
-      }
-    }
-  }
 
 	// release lockup account single
-  function releaseSingle(address _address) public {
+  function release(address _address) public {
   	NIAGTimelock[] memory locks = timelockList[_address];
+		emit Lock(locks);
     for(uint j = 0; j < locks.length; j++) {
+			emit LogString("releaseSingle for inner");
       if(locks[j].releaseTime() >= block.timestamp) {
+				emit LogString("super.release() before");
       	locks[j].release();
+				emit LogString("super.release() after");
       }
     }
   }
