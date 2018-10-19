@@ -131,6 +131,55 @@ const freezeTest = async () => {
   console.log(result)
 }
 
+const burnTest = async () => {
+  const gasPriceGwei = 3;
+  const gasLimit = 6721975;
+  const chainId = 5774;
+  const nonceHex = web3.utils.toHex( web3.eth.getTransactionCount(publicKey) );
+  const count = await web3.eth.getTransactionCount(publicKey);
+  const rawTransaction = {
+      "from": publicKey,
+      "nonce": "0x" + count.toString(16),
+      "gasPrice": web3.utils.toHex(gasPriceGwei * 1e9),
+      "gasLimit": web3.utils.toHex(gasLimit),
+      "to": contractAddress,
+      "value": "0x0",
+      "data": contract.methods.burn(100000000).encodeABI(),
+      "chainId": chainId
+  };
+  const tx = new EthereumTx(rawTransaction);
+  tx.sign(privateKey);
+  const serializedTx = tx.serialize();
+
+  const result = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+  console.log(result)
+}
+
+const mintTest = async () => {
+  const gasPriceGwei = 3;
+  const gasLimit = 6721975;
+  const chainId = 5774;
+  const toAddress = '0x7CA5cb04CFe18B3fcEf5EaCDFf5c3EFE675B1De9'
+  const nonceHex = web3.utils.toHex( web3.eth.getTransactionCount(publicKey) );
+  const count = await web3.eth.getTransactionCount(publicKey);
+  const rawTransaction = {
+      "from": publicKey,
+      "nonce": "0x" + count.toString(16),
+      "gasPrice": web3.utils.toHex(gasPriceGwei * 1e9),
+      "gasLimit": web3.utils.toHex(gasLimit),
+      "to": contractAddress,
+      "value": "0x0",
+      "data": contract.methods.mintSingle(toAddress, 2000).encodeABI(),
+      "chainId": chainId
+  };
+  const tx = new EthereumTx(rawTransaction);
+  tx.sign(privateKey);
+  const serializedTx = tx.serialize();
+
+  const result = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+  console.log(result)
+}
+
 
 async function main() {
   getBalanceTest()
