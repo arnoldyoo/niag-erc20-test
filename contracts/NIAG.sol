@@ -6,9 +6,9 @@ import './NIAGTimelock.sol';
 
 contract NIAGInfo {
 	uint internal constant INITIAL_SUPPLY = 320000000;
-  string internal name = 'NIAGToken';
-  string internal symbol = 'NIAG';
-  uint8 internal decimals = 8;
+  string public name = 'NIAGToken';
+  string public symbol = 'NIAG';
+  uint8 public decimals = 8;
   address internal owner;
 }
 
